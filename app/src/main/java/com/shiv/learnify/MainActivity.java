@@ -49,7 +49,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private Switch beaconSwitch;
     private ConstraintLayout beaconLayout;
     private TextView beaconStatus;
-    public HashSet<Marker> markersList;
+    public ArrayList<Marker> markersList;
     private ArrayList<Beacon> beaconsList;
     private Marker currentMarker;
     private String beaconKey;
@@ -68,7 +68,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         beaconSwitch = findViewById(R.id.beaconSwitch);
         beaconLayout = findViewById(R.id.beaconLayout);
         beaconStatus = findViewById(R.id.beaconStatus);
-        markersList = new HashSet<>();
+        markersList = new ArrayList<>();
         beaconsList = new ArrayList<>();
 
 
@@ -123,7 +123,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     courses.add("ECON 251");
                     courses.add("HIST 104");
                     Student student = new Student("Kartik", "kk@mm.com", 123456789, courses, null);
-                    Beacon beacon = new Beacon(student, "CS 253", new com.shiv.learnify.LatLng(latitude, longitude), "Midterm 2", "Help me please");
+                    Beacon beacon = new Beacon(student, "CS 250", new CustomLatLng(latitude, longitude), "Midterm 2", "Help me please");
 
                     LatLng place = new LatLng(latitude, longitude);
 //                    markersList.add(map.addMarker(new MarkerOptions().position(place).title("Current Location")));
@@ -140,15 +140,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 } else {
                     beaconLayout.setBackground(getDrawable(R.drawable.beacon_stroke_red));
                     beaconStatus.setText("Off");
-                    currentMarker.remove();
-                    markersList.remove(currentMarker);
-                    currentMarker = null;
+
                     DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
 
                     //TODO: remove the hard core course name and add it from the pop up for beacon info thing
-                    dr.child("universities").child("michigan").child("CS 251").child(beaconKey).removeValue();
+                    beaconsList.clear();
+                    dr.child("universities").child("michigan").child("CS 250").child(beaconKey).removeValue();
 
 
+                    currentMarker.remove();
+                    markersList.remove(currentMarker);
+                    currentMarker = null;
                 }
             }
         });
@@ -186,6 +188,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void showBeacons() {
+        for (int i = 0; i < markersList.size(); i++) {
+            markersList.get(i).remove();
+        }
+        markersList.clear();
         for (int i = 0; i < beaconsList.size(); i++) {
             LatLng latLng = new LatLng(beaconsList.get(i).location.latitude, beaconsList.get(i).location.longitude);
             markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
@@ -271,7 +277,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             LatLng place = new LatLng(latitude, longitude);
 //            map.addMarker(new MarkerOptions().position(place).title("Current Location"));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(place, 14));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(place, 15));
         } catch (NullPointerException e) {
             Log.i("MapView", "Map not ready yet");
         }

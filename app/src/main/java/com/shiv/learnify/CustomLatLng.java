@@ -1,13 +1,13 @@
 package com.shiv.learnify;
 
-public class LatLng {
+public class CustomLatLng {
     Double latitude;
     Double longitude;
 
-    public LatLng() {
+    public CustomLatLng() {
     }
 
-    public LatLng(Double latitude, Double longitude) {
+    public CustomLatLng(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
