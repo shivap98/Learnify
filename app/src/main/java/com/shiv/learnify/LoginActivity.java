@@ -17,15 +17,7 @@ public class LoginActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        String s = "shivisawesome";
-//        mAuth = FirebaseAuth.getInstance();
-
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference ref = firebaseDatabase.getReference("a");
-
-        ref.child("a").setValue("hey");
-
+        
     }
 
 
