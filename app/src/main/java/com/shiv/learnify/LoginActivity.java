@@ -16,6 +16,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -38,6 +42,11 @@ public class LoginActivity extends AppCompatActivity {
         signUpButton = findViewById(R.id.signUpButton);
 
         firebaseAuth = FirebaseAuth.getInstance();
+
+
+
+
+
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
