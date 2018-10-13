@@ -24,4 +24,15 @@ public class Beacon
     public Beacon() {
 
     }
+
+    @Override
+    public String toString() {
+        return "Beacon{" +
+                "student=" + student +
+                ", course='" + course + '\'' +
+                ", location=" + location +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

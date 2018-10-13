@@ -3,9 +3,11 @@ package com.shiv.learnify;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -125,6 +127,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     Student student = new Student("Kartik", "kk@mm.com", 123456789, courses, null);
                     Beacon beacon = new Beacon(student, "CS 250", new CustomLatLng(latitude, longitude), "Midterm 2", "Help me please");
 
+                    beaconsList.add(beacon);
                     LatLng place = new LatLng(latitude, longitude);
 //                    markersList.add(map.addMarker(new MarkerOptions().position(place).title("Current Location")));
                     currentMarker = map.addMarker(new MarkerOptions().position(place).title("Your Beacon"));
@@ -146,8 +149,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     //TODO: remove the hard core course name and add it from the pop up for beacon info thing
                     beaconsList.clear();
                     dr.child("universities").child("michigan").child("CS 250").child(beaconKey).removeValue();
-
-
                     currentMarker.remove();
                     markersList.remove(currentMarker);
                     currentMarker = null;
@@ -220,6 +221,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         setMarker();
+
+        //set on marker click for the selected marker and compare the title with the list
+        //TODO: add the info related to that marker in the bottom sheet
+
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                System.out.println(beaconsList.get(markersList.indexOf(marker)).toString());
+                return false;
+            }
+        });
     }
 
     /**
