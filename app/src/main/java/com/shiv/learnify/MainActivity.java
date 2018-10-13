@@ -13,7 +13,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.Switch;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.qhutch.bottomsheetlayout.BottomSheetLayout;
 
+import java.lang.invoke.ConstantCallSite;
 import java.util.ArrayList;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback
@@ -36,6 +40,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private Button beaconSelect; //TODO: replace with actual beacons
 
     private BottomSheetLayout bottomSheet;
+    private Switch beaconSwitch;
+    private ConstraintLayout beaconLayout;
+    private TextView beaconStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -48,6 +55,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         currentLocationButton = findViewById(R.id.currentLocation);
         beaconSelect = findViewById(R.id.beaconSelect);
         bottomSheet = findViewById(R.id.bottomSheetLayout);
+        beaconSwitch = findViewById(R.id.beaconSwitch);
+        beaconLayout = findViewById(R.id.beaconLayout);
+        beaconStatus = findViewById(R.id.beaconStatus);
+
         bottomSheet.setVisibility(View.GONE);
         currentLocationButton.setOnClickListener(new View.OnClickListener()
         {
@@ -79,6 +90,33 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 //TODO: populate bottom sheet layout with values
 
                 openBottomSheet();
+            }
+        });
+
+        beaconLayout.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                beaconSwitch.toggle();
+            }
+        });
+
+        beaconSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
+            {
+                if(isChecked)
+                {
+                    beaconLayout.setBackground(getDrawable(R.drawable.beacon_stroke_green));
+                    beaconStatus.setText("On");
+                }
+                else
+                {
+                    beaconLayout.setBackground(getDrawable(R.drawable.beacon_stroke_red));
+                    beaconStatus.setText("Off");
+                }
             }
         });
 
