@@ -277,4 +277,18 @@ public class LoginActivity extends AppCompatActivity
         logo.setVisibility(View.VISIBLE);
         logo.animate().scaleY(1);
     }
+
+    @Override
+    public void onBackPressed()
+    {
+        if(signUpMode)
+        {
+            hideSignUp();
+            signUpMode = false;
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
 }
