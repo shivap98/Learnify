@@ -70,6 +70,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
+
     /**
      * sign in the user in firebase and check if everything is fine or not
      * check if email address exits or not
@@ -141,7 +142,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * @param mail - email address specified
      * @param pass - password specified
      * @return if the email address and password valid or not
@@ -160,6 +160,10 @@ public class LoginActivity extends AppCompatActivity {
         //TODO: add feature where you check for . after @ as well
         if (mail.isEmpty()) {
             email.setError("Please type in email");
+            email.requestFocus();
+            valid = false;
+        } else if (!mail.endsWith(".edu")) {
+            email.setError("Please type .edu email");
             email.requestFocus();
             valid = false;
         } else
