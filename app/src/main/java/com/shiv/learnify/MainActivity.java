@@ -157,6 +157,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         getLocation();
 
+        //Database reference for listening to change in courses for particular uni only
         DatabaseReference courseReference = FirebaseDatabase.getInstance().getReference().child("universities")
                 .child("michigan");
 
@@ -164,11 +165,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                    System.out.println(snapshot);
                     for (DataSnapshot courseBeacon : snapshot.getChildren()) {
                         Beacon b = courseBeacon.getValue(Beacon.class);
                         beaconsList.add(b);
-                        Log.e("lat", b.location.latitude.toString());
                     }
                 }
 
@@ -182,10 +181,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
 
+        //linking the listener to reference
         courseReference.addValueEventListener(postListner);
 
 
     }
+
+    /**
+     * show beacons method
+     * called everytime when there is a change in list of beacons in firebase
+     */
 
     private void showBeacons() {
         for (int i = 0; i < markersList.size(); i++) {
