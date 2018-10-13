@@ -20,10 +20,10 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 public class LoginActivity extends AppCompatActivity {
 
-    TextInputEditText email;
-    TextInputEditText password;
-    Button loginButton;
-    Button signUpButton;
+    private TextInputEditText email;
+    private TextInputEditText password;
+    private Button loginButton;
+    private Button signUpButton;
 
     private FirebaseAuth firebaseAuth;
 
@@ -70,6 +70,14 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
+    /**
+     * sign in the user in firebase and check if everything is fine or not
+     * check if email address exits or not
+     * check if password is correct or not
+     *
+     * @param mail email address
+     * @param pass password
+     */
 
     private void signInUser(String mail, final String pass) {
         firebaseAuth.signInWithEmailAndPassword(mail, pass)
@@ -94,6 +102,16 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    /**
+     * creates new user in firebase and check if everything is fine or not
+     * check for valid password i.e. greater than 6 char
+     * check for valid email address
+     * check if email already exist in firebase
+     *
+     * @param mail email address
+     * @param pass password
+     */
 
     private void createNewUser(String mail, String pass) {
         firebaseAuth.createUserWithEmailAndPassword(mail, pass)
@@ -122,6 +140,12 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     *
+     * @param mail - email address specified
+     * @param pass - password specified
+     * @return if the email address and password valid or not
+     */
 
     private boolean checkForm(String mail, String pass) {
         boolean valid = true;
