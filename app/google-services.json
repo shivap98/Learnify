@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "510856597697",
+    "firebase_url": "https://learnify-study.firebaseio.com",
+    "project_id": "learnify-study",
+    "storage_bucket": "learnify-study.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510856597697:android:8995bc4940bffa42",
+        "android_client_info": {
+          "package_name": "com.shiv.learnify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "510856597697-nstfs8svh4brjd7da6dc7h75lt0ag0f7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3JpMCsChyhrXLLm1QMsKGevoAA8xo_Gs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
