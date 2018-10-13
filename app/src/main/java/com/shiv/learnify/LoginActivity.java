@@ -262,8 +262,8 @@ public class LoginActivity extends AppCompatActivity
     {
         signUpLayout.setVisibility(View.VISIBLE);
         cancelLayout.setVisibility(View.VISIBLE);
-        logo.setVisibility(View.GONE);
         logo.animate().scaleY(0);
+        logo.setVisibility(View.GONE);
     }
 
     /**
