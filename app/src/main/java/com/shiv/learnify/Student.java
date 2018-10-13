@@ -23,4 +23,7 @@ public class Student
         this.courses = courses;
         this.displayPicture = displayPicture;
     }
+
+    public Student() {
+    }
 }

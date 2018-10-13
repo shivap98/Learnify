@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -25,8 +26,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.qhutch.bottomsheetlayout.BottomSheetLayout;
 
 import java.util.ArrayList;
@@ -46,6 +50,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private ConstraintLayout beaconLayout;
     private TextView beaconStatus;
     public HashSet<Marker> markersList;
+    private ArrayList<Beacon> beaconsList;
     private Marker currentMarker;
     private String beaconKey;
 
@@ -64,6 +69,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         beaconLayout = findViewById(R.id.beaconLayout);
         beaconStatus = findViewById(R.id.beaconStatus);
         markersList = new HashSet<>();
+        beaconsList = new ArrayList<>();
 
 
         bottomSheet.setVisibility(View.GONE);
@@ -117,7 +123,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     courses.add("ECON 251");
                     courses.add("HIST 104");
                     Student student = new Student("Kartik", "kk@mm.com", 123456789, courses, null);
-                    Beacon beacon = new Beacon(student, "CS 251", new LatLng(latitude, longitude), "Midterm 2", "Help me please");
+                    Beacon beacon = new Beacon(student, "CS 253", new com.shiv.learnify.LatLng(latitude, longitude), "Midterm 2", "Help me please");
 
                     LatLng place = new LatLng(latitude, longitude);
 //                    markersList.add(map.addMarker(new MarkerOptions().position(place).title("Current Location")));
@@ -149,10 +155,43 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         getLocation();
 
+        DatabaseReference courseReference = FirebaseDatabase.getInstance().getReference().child("universities")
+                .child("michigan");
 
+        ValueEventListener postListner = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                    System.out.println(snapshot);
+                    for (DataSnapshot courseBeacon : snapshot.getChildren()) {
+                        Beacon b = courseBeacon.getValue(Beacon.class);
+                        beaconsList.add(b);
+                        Log.e("lat", b.location.latitude.toString());
+                    }
+                }
+
+                showBeacons();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+        courseReference.addValueEventListener(postListner);
 
 
     }
+
+    private void showBeacons() {
+        for (int i = 0; i < beaconsList.size(); i++) {
+            LatLng latLng = new LatLng(beaconsList.get(i).location.latitude, beaconsList.get(i).location.longitude);
+            markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
+        }
+    }
+
 
     /**
      * If Google Play services is not installed on the device, the user will be prompted to install
@@ -232,7 +271,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             LatLng place = new LatLng(latitude, longitude);
 //            map.addMarker(new MarkerOptions().position(place).title("Current Location"));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(place, 18));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(place, 14));
         } catch (NullPointerException e) {
             Log.i("MapView", "Map not ready yet");
         }

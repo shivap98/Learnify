@@ -10,16 +10,20 @@ public class Beacon
 {
     Student student;
     String course;
-    LatLng location;
+    com.shiv.learnify.LatLng location;
     String title;
     String description;
 
-    public Beacon(Student student, String course, LatLng location, String title, String description)
+    public Beacon(Student student, String course, com.shiv.learnify.LatLng location, String title, String description)
     {
         this.student = student;
         this.course = course;
         this.location = location;
         this.title = title;
         this.description = description;
+    }
+
+    public Beacon() {
+
     }
 }
