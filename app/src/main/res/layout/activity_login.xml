@@ -34,10 +34,10 @@
                     android:layout_margin="10dp">
 
                     <android.support.design.widget.TextInputEditText
-                        android:id="@+id/userName"
+                        android:id="@+id/email"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="username"
+                        android:hint="email"
                         android:inputType="textEmailAddress" />
                 </android.support.design.widget.TextInputLayout>
 
@@ -80,7 +80,8 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
                     android:text="SIGN UP"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf=
+                        "parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toEndOf="@+id/loginButton"
