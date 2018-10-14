@@ -1,19 +1,25 @@
 package com.shiv.learnify;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,26 +30,50 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private final int PICK_IMAGE_REQUEST = 71;
     ImageView logo;
     ConstraintLayout signUpLayout;
     ConstraintLayout cancelLayout;
     boolean signUpMode = false;
+    StorageReference storageReference;
+    FrameLayout progressBarLayout;
     private TextInputEditText email;
     private TextInputEditText password;
     private Button loginButton;
     private Button signUpButton;
     private FirebaseAuth firebaseAuth;
-
     private TextInputEditText name;
     private TextInputEditText phone;
     private TextInputEditText university;
+    private Button uploadButton;
+    private ImageView previewDP;
+    private Uri filePath;
+    private String DPLink;
 
-    FrameLayout progressBarLayout;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+            filePath = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                previewDP.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +93,8 @@ public class LoginActivity extends AppCompatActivity {
         name = findViewById(R.id.name);
         phone = findViewById(R.id.phone);
         university = findViewById(R.id.university);
+        uploadButton = findViewById(R.id.uploadPicButton);
+        previewDP = findViewById(R.id.previewDP);
 
         progressBarLayout = findViewById(R.id.frameLayout);
 
@@ -79,9 +111,11 @@ public class LoginActivity extends AppCompatActivity {
                     String phoneString = phone.getText().toString();
                     String uniString = university.getText().toString();
 
+
                     if (!checkSignUpForm(mail, pass, nameString, phoneString, uniString)) {
                         return;
                     }
+
 
                     progressBarLayout.setVisibility(View.VISIBLE);
 
@@ -123,6 +157,47 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        uploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+            }
+        });
+
+
+    }
+
+    private void uploadImage(String mail) {
+
+        if (filePath != null) {
+//            final ProgressDialog progressDialog = new ProgressDialog(this);
+//            progressDialog.setTitle("Uploading...");
+//            progressDialog.show();
+
+            StorageReference ref = storageReference.child("images/" + mail);
+            ref.putFile(filePath)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(LoginActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        }
+                    });
+        }
     }
 
 
@@ -200,6 +275,9 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser fu = firebaseAuth.getCurrentUser();
                             String uid = fu.getUid();
                             System.out.println(uid);
+
+                            storageReference = FirebaseStorage.getInstance().getReference();
+                            uploadImage(mail);
 
 
                             DatabaseReference dr = FirebaseDatabase.getInstance().getReference()

@@ -13,15 +13,15 @@ public class Student
     String email;
     String phone;
     ArrayList<String> courses;
-    Image displayPicture;
+    String displayPicturelink;
 
-    public Student(String name, String email, String phone, ArrayList<String> courses, Image displayPicture)
+    public Student(String name, String email, String phone, ArrayList<String> courses, String displayPictureLink)
     {
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.courses = courses;
-        this.displayPicture = displayPicture;
+        this.displayPicturelink = displayPictureLink;
     }
 
     public Student() {
@@ -34,7 +34,7 @@ public class Student
                 ", email='" + email + '\'' +
                 ", phone=" + phone +
                 ", courses=" + courses +
-                ", displayPicture=" + displayPicture +
+                ", displayPicture=" + displayPicturelink +
                 '}';
     }
 }

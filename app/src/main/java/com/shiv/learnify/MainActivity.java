@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -33,12 +34,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.qhutch.bottomsheetlayout.BottomSheetLayout;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -126,6 +132,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         beaconTitle = findViewById(R.id.beaconTitle);
         descriptionText = findViewById(R.id.descriptionText);
 
+
         courseToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -142,6 +149,23 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 currentStudent = dataSnapshot.getValue(Student.class);
                 coursesList.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, currentStudent.courses));
                 System.out.println(currentStudent);
+                StorageReference sr = FirebaseStorage.getInstance().getReference();
+                sr.child("images/" + currentStudent.email).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Picasso.get()
+                                .load(uri.toString())
+                                .fit()
+                                .centerCrop()
+                                .into(courseToggle);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        profilePic.setImageResource(R.mipmap.ic_launcher_round);
+
+                    }
+                });
             }
 
             @Override
@@ -149,6 +173,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
+
 
         beaconLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -390,8 +416,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
      * @param beacon, beacon selected
      */
     void populateBeaconBottomSheet(Beacon beacon) {
+        StorageReference sr = FirebaseStorage.getInstance().getReference();
+        sr.child("images/" + beacon.student.email).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.get()
+                        .load(uri.toString())
+                        .fit()
+                        .centerCrop()
+                        .into(profilePic);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                profilePic.setImageResource(R.mipmap.ic_launcher_round);
+
+            }
+        });
         //TODO: set photo in profile pic
-        profilePic.setImageResource(R.mipmap.ic_launcher_round);
         studentName.setText(beacon.student.name);
         courseName.setText(beacon.course);
         beaconTitle.setText(beacon.title);
