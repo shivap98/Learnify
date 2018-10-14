@@ -59,6 +59,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private String uid;
     private String currentBeaconCourse;
 
+    boolean firstRefresh = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +83,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 bottomSheet.collapse();
-                getLocation();
+                setMarker();
             }
         });
 
@@ -268,7 +270,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         while (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
+        while (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+        }
 
+        LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -293,12 +299,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
 
-                setMarker();
+                if(firstRefresh)
+                {
+                    setMarker();
+                    firstRefresh = false;
+                }
             }
 
         };
-
-        LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
