@@ -146,7 +146,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         beaconTitle = findViewById(R.id.beaconTitle);
         descriptionText = findViewById(R.id.descriptionText);
 
-
         courseToggle.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -218,7 +217,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             {
                 if(isChecked)
                 {
-
                     LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
                     View promptsView = layoutInflater.inflate(R.layout.course_values_input_dialog, null);
                     final TextInputEditText title = promptsView.findViewById(R.id.titleInput);
@@ -518,7 +516,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
-        //TODO: set photo in profile pic
 
         studentName.setText(beacon.student.name);
         courseName.setText(beacon.course);
@@ -630,5 +627,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             //TODO: Implement proper back handling
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        if(beaconSwitch.isChecked())
+        {
+            beaconSwitch.setChecked(false);
+        }
+        super.onDestroy();
     }
 }
