@@ -1,7 +1,9 @@
 package com.shiv.learnify;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -68,6 +71,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private ImageView courseToggle;
     private boolean coursesExpanded = false;
     private TextInputEditText searchInput;
+    private String selectedBeaconCourse; // course which is selected from the course list of the student
+    // which is used to filter the beacons for the map
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,10 +170,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     //TODO: also add the pop up for the beacon specific info
                     //TODO: update currentBeaconCourse name as well
                     //this is temporary right now
+                    currentBeaconCourse = "CS 373";
+                    selectedBeaconCourse = null;
 
-                    currentBeaconCourse = "CS 252";
-
-                    Beacon beacon = new Beacon(currentStudent, "CS 252", new CustomLatLng(latitude, longitude), "Lab03", "Raspberry PI set up");
+                    Beacon beacon = new Beacon(currentStudent, currentBeaconCourse, new CustomLatLng(latitude, longitude), "Lab03", "Raspberry PI set up");
 
                     beaconsList.add(beacon);
                     LatLng place = new LatLng(latitude, longitude);
@@ -217,6 +222,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 }
 
+
                 showBeacons();
 
             }
@@ -227,10 +233,71 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
 
+
+        coursesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                //TODO: collapse the course list and set the search box to course selected
+                selectedBeaconCourse = currentStudent.courses.get(i);
+                showBeacons();
+            }
+        });
+
+        coursesList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                showConfirmationPrompt("Confirm?",
+                        "Do you really want to delete " + currentStudent.courses.get(i) +
+                                " from your courses?", true, i);
+                return false;
+            }
+        });
+
         //linking the listener to reference
         courseReference.addValueEventListener(postListner);
 
 
+    }
+
+    /**
+     * Shows a yes/no prompt based on preferences
+     *
+     * @param title,       dialog title
+     * @param description, dialog description
+     * @param cancelable,  doh
+     */
+    public void showConfirmationPrompt(String title, String description, boolean cancelable, final int i) {
+        //Creating alert dialog
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        if (title != null) {
+            alertDialogBuilder.setTitle(title);
+        }
+        alertDialogBuilder.setMessage(description);
+        alertDialogBuilder.setCancelable(cancelable);
+        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                currentStudent.courses.remove(i);
+                DatabaseReference dr = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
+                dr.setValue(currentStudent);
+                coursesList.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, currentStudent.courses));
+
+            }
+        });
+        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+            }
+        });
+        if (cancelable) {
+            alertDialogBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+                }
+            });
+        }
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     /**
@@ -259,10 +326,20 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             markersList.get(i).remove();
         }
         markersList.clear();
-        for (int i = 0; i < beaconsList.size(); i++) {
-            LatLng latLng = new LatLng(beaconsList.get(i).location.latitude, beaconsList.get(i).location.longitude);
-            markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
+        if (selectedBeaconCourse == null) {
+            for (int i = 0; i < beaconsList.size(); i++) {
+                LatLng latLng = new LatLng(beaconsList.get(i).location.latitude, beaconsList.get(i).location.longitude);
+                markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
+            }
+        } else {
+            for (int i = 0; i < beaconsList.size(); i++) {
+                if (selectedBeaconCourse.equals(beaconsList.get(i).course)) {
+                    LatLng latLng = new LatLng(beaconsList.get(i).location.latitude, beaconsList.get(i).location.longitude);
+                    markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
+                }
+            }
         }
+
     }
 
     /**
@@ -277,6 +354,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng latLng) {
                 closeBottomSheet();
+
                 System.out.println("map click");
             }
         });
@@ -285,7 +363,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Beacon beacon = beaconsList.get(markersList.indexOf(marker));
+
+                Beacon beacon = null;
+                LatLng coor = marker.getPosition();
+                for (int i = 0; i < beaconsList.size(); i++) {
+                    if (coor.latitude == beaconsList.get(i).location.latitude && coor.longitude == beaconsList.get(i).location.longitude) {
+                        beacon = beaconsList.get(i);
+                        break;
+                    }
+
+                }
                 System.out.println(beacon.toString());
 
                 populateBeaconBottomSheet(beacon);
@@ -354,6 +441,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
         };
+        //TODO: remove network provider for better emulator location
         manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
