@@ -9,13 +9,20 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -34,6 +41,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.qhutch.bottomsheetlayout.BottomSheetLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -59,6 +67,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private String uid;
     private String currentBeaconCourse;
 
+    private ListView coursesList;
+    private Button addCourseButton;
+    private ImageView courseToggle;
+    private boolean coursesExpanded = false;
+    private TextInputEditText searchInput;
+
     boolean firstRefresh = true;
 
     @Override
@@ -73,10 +87,33 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         beaconSwitch = findViewById(R.id.beaconSwitch);
         beaconLayout = findViewById(R.id.beaconLayout);
         beaconStatus = findViewById(R.id.beaconStatus);
+        coursesList = findViewById(R.id.coursesList);
+        addCourseButton = findViewById(R.id.addCourseButton);
+        courseToggle = findViewById(R.id.courseToggleProfilePic);
+        searchInput = findViewById(R.id.searchInput);
         markersList = new ArrayList<>();
         beaconsList = new ArrayList<>();
 
         uid = getIntent().getExtras().getString("uid");
+
+        addCourseButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if(!searchInput.getText().toString().equals(""))
+                {
+                    if(!currentStudent.courses.contains(searchInput.getText().toString()))
+                    {
+                        currentStudent.courses.add(searchInput.getText().toString());
+                        coursesList.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,
+                                android.R.id.text1, currentStudent.courses));
+                        //TODO: refresh courses of student server side
+                        searchInput.setText("");
+                    }
+                }
+            }
+        });
 
         bottomSheet.setVisibility(View.GONE);
         currentLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -93,6 +130,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         beaconTitle = findViewById(R.id.beaconTitle);
         descriptionText = findViewById(R.id.descriptionText);
 
+        courseToggle.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                coursesListViewToggle();
+            }
+        });
+
         //getting the student from database using the uid
 
         DatabaseReference studentReference = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
@@ -100,6 +146,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 currentStudent = dataSnapshot.getValue(Student.class);
+                coursesList.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, currentStudent.courses));
                 System.out.println(currentStudent);
             }
 
@@ -108,7 +155,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
-
 
         beaconLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,10 +245,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
+     * Toggles the view for the courses list
+     */
+    void coursesListViewToggle()
+    {
+        if(coursesExpanded)
+        {
+            coursesList.setVisibility(View.GONE);
+            addCourseButton.setVisibility(View.GONE);
+            searchInput.setHint("Search for Courses");
+            coursesExpanded = false;
+        }
+        else
+        {
+            coursesList.setVisibility(View.VISIBLE);
+            addCourseButton.setVisibility(View.VISIBLE);
+            searchInput.setHint("Add new Course");
+            coursesExpanded = true;
+        }
+    }
+
+    /**
      * show beacons method
      * called everytime when there is a change in list of beacons in firebase
      */
-
     private void showBeacons() {
         for (int i = 0; i < markersList.size(); i++) {
             markersList.get(i).remove();
@@ -213,8 +279,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
         }
     }
-
-
     /**
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
@@ -231,9 +295,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         setMarker();
-
-        //set on marker click for the selected marker and compare the title with the list
-        //TODO: add the info related to that marker in the bottom sheet
 
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
