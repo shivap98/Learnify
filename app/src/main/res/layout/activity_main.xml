@@ -81,13 +81,15 @@
 
     </android.support.v7.widget.CardView>
 
-    <ImageButton
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/currentLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:src="@android:drawable/ic_menu_mylocation"
+        android:src="@drawable/ic_location"
+        android:elevation="12dp"
+        app:backgroundTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardView1" />
 
@@ -138,8 +140,8 @@
         android:id="@+id/bottomSheetLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:collapsedHeight="130dp"
+        android:visibility="visible"
+        app:collapsedHeight="120dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -152,7 +154,7 @@
             android:layout_marginRight="12dp"
             android:layout_marginBottom="-12dp"
             app:cardCornerRadius="12dp"
-            app:cardElevation="8dp"
+            app:cardElevation="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -179,6 +181,7 @@
                     android:maxHeight="100dp"
                     android:text="Please help me. I don't know anything. I might fail."
                     android:textSize="18dp"
+                    android:textColor="@color/text"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="@+id/textView5"
@@ -198,9 +201,9 @@
                     android:id="@+id/studentName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/text"
                     android:layout_marginStart="16dp"
                     android:text="Shiv Paul"
-                    android:textColor="@android:color/black"
                     android:textSize="24dp"
                     app:layout_constraintStart_toEndOf="@+id/profilePic"
                     app:layout_constraintTop_toTopOf="@+id/profilePic" />
@@ -210,7 +213,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CS 250"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/text"
                     android:textSize="20dp"
                     app:layout_constraintStart_toStartOf="@+id/studentName"
                     app:layout_constraintTop_toBottomOf="@+id/studentName" />
@@ -219,8 +222,8 @@
                     android:id="@+id/beaconTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/text"
                     android:text="Midterm 1"
-                    android:textColor="@android:color/black"
                     android:textSize="24dp"
                     app:layout_constraintStart_toStartOf="@+id/courseName"
                     app:layout_constraintTop_toBottomOf="@+id/courseName" />
@@ -229,77 +232,107 @@
                     android:id="@+id/textView5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Description"
-                    android:textColor="@android:color/black"
-                    android:textSize="20dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Description: "
+                    android:textSize="18dp"
                     app:layout_constraintStart_toStartOf="@+id/profilePic"
                     app:layout_constraintTop_toBottomOf="@+id/beaconTitle" />
 
-                <ImageButton
-                    android:id="@+id/emailButton"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/listLayout1"
+                    android:layout_width="0dp"
+                    android:layout_height="62dp"
                     android:layout_marginTop="8dp"
-                    app:layout_constraintEnd_toStartOf="@+id/phoneButton"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/descriptionText"
-                    app:srcCompat="@android:drawable/ic_dialog_email" />
+                    app:layout_constraintEnd_toEndOf="@+id/descriptionText"
+                    app:layout_constraintStart_toStartOf="@+id/descriptionText"
+                    app:layout_constraintTop_toBottomOf="@+id/descriptionText">
 
-                <ImageButton
-                    android:id="@+id/phoneButton"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    app:layout_constraintEnd_toStartOf="@+id/directionsButton"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/emailButton"
-                    app:layout_constraintTop_toTopOf="@+id/emailButton"
-                    app:srcCompat="@android:drawable/stat_sys_speakerphone" />
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="7dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:src="@drawable/ic_textsms" />
 
-                <ImageButton
-                    android:id="@+id/directionsButton"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/phoneButton"
-                    app:layout_constraintTop_toTopOf="@+id/phoneButton"
-                    app:srcCompat="@android:drawable/ic_dialog_map" />
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:textColor="@color/text"
+                        android:textSize="18dp"
+                        android:text="Send a text"
+                        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+                        app:layout_constraintStart_toEndOf="@+id/imageView"
+                        app:layout_constraintTop_toTopOf="@+id/imageView" />
+                </android.support.constraint.ConstraintLayout>
 
-                <TextView
-                    android:id="@+id/textView7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/listLayout2"
+                    android:layout_width="0dp"
+                    android:layout_height="62dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="@id/listLayout1"
+                    app:layout_constraintStart_toStartOf="@id/listLayout1"
+                    app:layout_constraintTop_toBottomOf="@id/listLayout1">
+
+                    <ImageView
+                        android:id="@+id/imageView2"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:src="@drawable/ic_email" />
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:textColor="@color/text"
+                        android:textSize="18dp"
+                        android:text="Send an email"
+                        app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+                        app:layout_constraintStart_toEndOf="@+id/imageView2"
+                        app:layout_constraintTop_toTopOf="@+id/imageView2" />
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/listLayout3"
+                    android:layout_width="0dp"
+                    android:layout_height="62dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="20dp"
-                    android:text="Send an email"
-                    android:textAlignment="center"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/emailButton"
-                    app:layout_constraintStart_toStartOf="@+id/emailButton"
-                    app:layout_constraintTop_toBottomOf="@+id/emailButton" />
+                    app:layout_constraintEnd_toEndOf="@id/listLayout2"
+                    app:layout_constraintStart_toStartOf="@id/listLayout2"
+                    app:layout_constraintTop_toBottomOf="@id/listLayout2">
 
-                <TextView
-                    android:id="@+id/textView8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Send a text"
-                    android:textAlignment="center"
-                    app:layout_constraintEnd_toEndOf="@+id/phoneButton"
-                    app:layout_constraintStart_toStartOf="@+id/phoneButton"
-                    app:layout_constraintTop_toBottomOf="@+id/phoneButton" />
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:src="@drawable/ic_directions" />
 
-                <TextView
-                    android:id="@+id/textView9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Get Directions"
-                    app:layout_constraintEnd_toEndOf="@+id/directionsButton"
-                    app:layout_constraintStart_toStartOf="@+id/directionsButton"
-                    app:layout_constraintTop_toBottomOf="@+id/directionsButton" />
+                    <TextView
+                        android:id="@+id/textView6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:textColor="@color/text"
+                        android:textSize="18dp"
+                        android:text="Get directions"
+                        app:layout_constraintBottom_toBottomOf="@+id/imageView3"
+                        app:layout_constraintStart_toEndOf="@+id/imageView3"
+                        app:layout_constraintTop_toTopOf="@+id/imageView3" />
+                </android.support.constraint.ConstraintLayout>
+
             </android.support.constraint.ConstraintLayout>
 
         </android.support.v7.widget.CardView>
@@ -314,6 +347,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:src="@mipmap/ic_launcher_round"
+        android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

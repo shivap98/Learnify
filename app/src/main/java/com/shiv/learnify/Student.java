@@ -4,7 +4,6 @@ package com.shiv.learnify;
  * Created by Shiv Paul on 10/13/2018.
  */
 
-import android.media.Image;
 import java.util.ArrayList;
 
 public class Student
