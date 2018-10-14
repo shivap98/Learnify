@@ -3,11 +3,9 @@ package com.shiv.learnify;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -15,9 +13,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -36,26 +34,32 @@ import com.google.firebase.database.ValueEventListener;
 import com.qhutch.bottomsheetlayout.BottomSheetLayout;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public ArrayList<Marker> markersList;
+    Student currentStudent;
+    //bottom sheet fields
+    ImageView profilePic;
+    TextView studentName;
+    TextView courseName;
+    TextView beaconTitle;
+    TextView descriptionText;
     private GoogleMap map;
     private double latitude;
     private double longitude;
     private ImageButton currentLocationButton;
-
-    private Button beaconSelect; //TODO: replace with actual beacons
-
     private BottomSheetLayout bottomSheet;
     private Switch beaconSwitch;
     private ConstraintLayout beaconLayout;
     private TextView beaconStatus;
-    public ArrayList<Marker> markersList;
     private ArrayList<Beacon> beaconsList;
     private Marker currentMarker;
     private String beaconKey;
+    private String uid;
+    private String currentBeaconCourse;
 
+    boolean firstRefresh = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +69,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         currentLocationButton = findViewById(R.id.currentLocation);
-        beaconSelect = findViewById(R.id.beaconSelect);
         bottomSheet = findViewById(R.id.bottomSheetLayout);
         beaconSwitch = findViewById(R.id.beaconSwitch);
         beaconLayout = findViewById(R.id.beaconLayout);
@@ -73,28 +76,39 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         markersList = new ArrayList<>();
         beaconsList = new ArrayList<>();
 
+        uid = getIntent().getExtras().getString("uid");
 
         bottomSheet.setVisibility(View.GONE);
         currentLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 bottomSheet.collapse();
-                getLocation();
+                setMarker();
             }
         });
 
-        beaconSelect.setOnClickListener(new View.OnClickListener() {
+        profilePic = findViewById(R.id.profilePic);
+        studentName = findViewById(R.id.studentName);
+        courseName = findViewById(R.id.courseName);
+        beaconTitle = findViewById(R.id.beaconTitle);
+        descriptionText = findViewById(R.id.descriptionText);
+
+        //getting the student from database using the uid
+
+        DatabaseReference studentReference = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
+        studentReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View view) {
-                bottomSheet.collapse();
-                //TODO: replace this with function to get Beacon from latlng if exists
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                currentStudent = dataSnapshot.getValue(Student.class);
+                System.out.println(currentStudent);
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                //TODO: populate bottom sheet layout with values
-
-                openBottomSheet();
             }
         });
+
 
         beaconLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,22 +124,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     beaconLayout.setBackground(getDrawable(R.drawable.beacon_stroke_green));
                     beaconStatus.setText("On");
 
-
                     //adding the beacon for the current location and sending it to the database
                     closeBottomSheet();
                     getLocation();
-                    //TODO:add the pop up where the student info is entered
                     //TODO: also add the pop up for the beacon specific info
+                    //TODO: update currentBeaconCourse name as well
                     //this is temporary right now
-                    ArrayList<String> courses = new ArrayList<>();
-                    courses.add("CS 250");
-                    courses.add("CS 251");
-                    courses.add("CS 291");
-                    courses.add("MA 261");
-                    courses.add("ECON 251");
-                    courses.add("HIST 104");
-                    Student student = new Student("Kartik", "kk@mm.com", 123456789, courses, null);
-                    Beacon beacon = new Beacon(student, "CS 250", new CustomLatLng(latitude, longitude), "Midterm 2", "Help me please");
+
+                    currentBeaconCourse = "CS 252";
+
+                    Beacon beacon = new Beacon(currentStudent, "CS 252", new CustomLatLng(latitude, longitude), "Lab03", "Raspberry PI set up");
 
                     beaconsList.add(beacon);
                     LatLng place = new LatLng(latitude, longitude);
@@ -146,12 +154,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                     DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
 
-                    //TODO: remove the hard core course name and add it from the pop up for beacon info thing
                     beaconsList.clear();
-                    dr.child("universities").child("michigan").child("CS 250").child(beaconKey).removeValue();
+                    dr.child("universities").child("michigan").child(currentBeaconCourse).child(beaconKey).removeValue();
                     currentMarker.remove();
                     markersList.remove(currentMarker);
                     currentMarker = null;
+                    closeBottomSheet();
+
                 }
             }
         });
@@ -165,7 +174,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ValueEventListener postListner = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     for (DataSnapshot courseBeacon : snapshot.getChildren()) {
                         Beacon b = courseBeacon.getValue(Beacon.class);
                         beaconsList.add(b);
@@ -228,10 +237,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                System.out.println(beaconsList.get(markersList.indexOf(marker)).toString());
+                Beacon beacon = beaconsList.get(markersList.indexOf(marker));
+                System.out.println(beacon.toString());
+
+                populateBeaconBottomSheet(beacon);
+
+                openBottomSheet();
+
                 return false;
             }
         });
+    }
+
+    /**
+     * Displays the beacon values in the bottom sheet when beacon is selected
+     *
+     * @param beacon, beacon selected
+     */
+    void populateBeaconBottomSheet(Beacon beacon) {
+        //TODO: set photo in profile pic
+        profilePic.setImageResource(R.mipmap.ic_launcher_round);
+        studentName.setText(beacon.student.name);
+        courseName.setText(beacon.course);
+        beaconTitle.setText(beacon.title);
+        descriptionText.setText(beacon.description);
     }
 
     /**
@@ -241,7 +270,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         while (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
+        while (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+        }
 
+        LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -266,12 +299,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
 
-                setMarker();
+                if(firstRefresh)
+                {
+                    setMarker();
+                    firstRefresh = false;
+                }
             }
 
         };
-
-        LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 

@@ -11,11 +11,11 @@ public class Student
 {
     String name;
     String email;
-    int phone;
+    String phone;
     ArrayList<String> courses;
     Image displayPicture;
 
-    public Student(String name, String email, int phone, ArrayList<String> courses, Image displayPicture)
+    public Student(String name, String email, String phone, ArrayList<String> courses, Image displayPicture)
     {
         this.name = name;
         this.email = email;
@@ -25,5 +25,16 @@ public class Student
     }
 
     public Student() {
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", phone=" + phone +
+                ", courses=" + courses +
+                ", displayPicture=" + displayPicture +
+                '}';
     }
 }
