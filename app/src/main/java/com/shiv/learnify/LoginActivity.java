@@ -8,7 +8,9 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,6 +43,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText phone;
     private TextInputEditText university;
 
+    FrameLayout progressBarLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +64,8 @@ public class LoginActivity extends AppCompatActivity {
         phone = findViewById(R.id.phone);
         university = findViewById(R.id.university);
 
+        progressBarLayout = findViewById(R.id.frameLayout);
+
         firebaseAuth = FirebaseAuth.getInstance();
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +83,8 @@ public class LoginActivity extends AppCompatActivity {
                         return;
                     }
 
-                    //TODO: add showProgressDialog
+                    progressBarLayout.setVisibility(View.VISIBLE);
+
                     createNewUser(mail, pass, nameString, phoneString, uniString);
                 } else {
                     showSignUp();
@@ -106,7 +113,8 @@ public class LoginActivity extends AppCompatActivity {
                         return;
                     }
 
-                    //TODO: add showProgressDialog
+                    progressBarLayout.setVisibility(View.VISIBLE);
+
                     signInUser(mail, pass);
                 } else {
                     hideSignUp();
@@ -138,19 +146,20 @@ public class LoginActivity extends AppCompatActivity {
                             String uid = fu.getUid();
                             System.out.println(uid);
 
-                            //TODO: pass the uid to intent
-
                             Intent i = new Intent(LoginActivity.this, MainActivity.class);
                             i.putExtra("uid", uid);
                             startActivity(i);
+                            progressBarLayout.setVisibility(View.GONE);
 
                         } else {
                             try {
                                 throw task.getException();
                             } catch (FirebaseAuthInvalidUserException e) {
+                                progressBarLayout.setVisibility(View.GONE);
                                 email.setError("Email doesn't exist or has been disabled");
                                 email.requestFocus();
                             } catch (FirebaseAuthInvalidCredentialsException e) {
+                                progressBarLayout.setVisibility(View.GONE);
                                 password.setError("Wrong Password");
                                 password.requestFocus();
                             } catch (Exception e) {
@@ -197,22 +206,24 @@ public class LoginActivity extends AppCompatActivity {
                                     .child("Users");
                             dr.child(uid).setValue(stud);
 
-                            //TODO: pass the uid to intent
-
                             Intent i = new Intent(LoginActivity.this, MainActivity.class);
                             i.putExtra("uid", uid);
                             startActivity(i);
+                            progressBarLayout.setVisibility(View.GONE);
 
                         } else {
                             try {
                                 throw task.getException();
                             } catch (FirebaseAuthWeakPasswordException e) {
+                                progressBarLayout.setVisibility(View.GONE);
                                 password.setError("Password length must be greater than 6 chars");
                                 password.requestFocus();
                             } catch (FirebaseAuthInvalidCredentialsException e) {
+                                progressBarLayout.setVisibility(View.GONE);
                                 email.setError("Please type valid email");
                                 email.requestFocus();
                             } catch (FirebaseAuthUserCollisionException e) {
+                                progressBarLayout.setVisibility(View.GONE);
                                 email.setError("User already exists");
                                 email.requestFocus();
                             } catch (Exception e) {
