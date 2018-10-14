@@ -1,9 +1,11 @@
 package com.shiv.learnify;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -230,10 +232,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                             String titleString = title.getText().toString();
                                             String descString = description.getText().toString();
 
-                                            beacon = new Beacon(currentStudent, currentBeaconCourse,
+                                            Beacon myBeacon = new Beacon(currentStudent, currentBeaconCourse,
                                                     new CustomLatLng(latitude, longitude), titleString, descString);
 
-                                            beaconsList.add(beacon);
+                                            beaconsList.add(myBeacon);
                                             LatLng place = new LatLng(latitude, longitude);
                                             currentMarker = map.addMarker(new MarkerOptions().position(place).title("Your Beacon").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                                             markersList.add(currentMarker);
@@ -241,7 +243,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                             DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
                                             beaconKey = dr.push().getKey();
 
-                                            dr.child("universities").child("michigan").child(beacon.course).child(beaconKey).setValue(beacon);
+                                            dr.child("universities").child("michigan").child(myBeacon.course).child(beaconKey).setValue(myBeacon);
                                         }
                                     });
                     AlertDialog alertDialog = alertDialogBuilder.create();
@@ -336,6 +338,46 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 return false;
             }
         });
+
+        ConstraintLayout sendText = findViewById(R.id.sendTextLayout);
+        ConstraintLayout sendEmail = findViewById(R.id.sendEmailLayout);
+        ConstraintLayout getDirections = findViewById(R.id.getDirectionsLayout);
+
+        sendText.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", beacon.student.phone, null)));
+            }
+        });
+
+        sendEmail.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                        "mailto",beacon.student.email, null));
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Hello from Learnify!");
+                emailIntent.putExtra(Intent.EXTRA_TEXT, String.format("Hi %s!\nMy name is %s and I am also studying %s near you! Want to get together?",
+                        beacon.student.name, currentStudent.name, beacon.course));
+                startActivity(Intent.createChooser(emailIntent, "Send email"));
+            }
+        });
+
+        getDirections.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                @SuppressLint("DefaultLocale") Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse(String.format("http://maps.google.com/maps?daddr=%f,%f",
+                                beacon.location.latitude, beacon.location.longitude)));
+                startActivity(intent);
+            }
+        });
+
     }
 
     /**
@@ -447,7 +489,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(Marker marker) {
 
-                Beacon beacon = null;
+                beacon = null;
                 LatLng coor = marker.getPosition();
                 for (int i = 0; i < beaconsList.size(); i++) {
                     if (coor.latitude == beaconsList.get(i).location.latitude && coor.longitude == beaconsList.get(i).location.longitude) {
