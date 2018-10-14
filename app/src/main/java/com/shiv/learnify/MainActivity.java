@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,9 +13,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,6 +27,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -41,6 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.qhutch.bottomsheetlayout.BottomSheetLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 {
@@ -141,11 +147,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             {
                 if(coursesExpanded)
                 {
-                    courseListViewHide();
+                    courseListCollapse();
                 }
                 else
                 {
-                    courseListViewShow();
+                    courseListExpand();
                 }
             }
         });
@@ -186,32 +192,55 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             {
                 if(isChecked)
                 {
-                    beaconLayout.setBackground(getDrawable(R.drawable.beacon_stroke_green));
-                    beaconStatus.setText("On");
 
-                    //adding the beacon for the current location and sending it to the database
-                    closeBottomSheet();
-                    getLocation();
-                    //TODO: also add the pop up for the beacon specific info
-                    //TODO: update currentBeaconCourse name as well
-                    //this is temporary right now
-                    currentBeaconCourse = "CS 373";
-                    selectedBeaconCourse = null;    //because when we start a beacon, we should remove all filters
+                    LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+                    View promptsView = layoutInflater.inflate(R.layout.course_values_input_dialog, null);
+                    final TextInputEditText title = promptsView.findViewById(R.id.titleInput);
+                    title.setHint("Title");
+                    final TextInputEditText description = promptsView.findViewById(R.id.descriptionInput);
+                    description.setHint("Description");
+                    final Spinner spinner = promptsView.findViewById(R.id.courseSpinner);
 
-                    Beacon beacon = new Beacon(currentStudent, currentBeaconCourse, new CustomLatLng(latitude, longitude), "Lab03", "Raspberry PI set up");
+                    spinner.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, currentStudent.courses));
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
-                    beaconsList.add(beacon);
-                    LatLng place = new LatLng(latitude, longitude);
-//                    markersList.add(map.addMarker(new MarkerOptions().position(place).title("Current Location")));
-                    currentMarker = map.addMarker(new MarkerOptions().position(place).title("Your Beacon"));
-                    markersList.add(currentMarker);
+                    alertDialogBuilder
+                            .setView(promptsView)
+                            .setCancelable(false)
+                            .setPositiveButton("OK",
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        public void onClick(DialogInterface dialog, int id)
+                                        {
+                                            //Click ok
+                                            beaconLayout.setBackground(getDrawable(R.drawable.beacon_stroke_green));
+                                            beaconStatus.setText("On");
 
-                    DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
-                    beaconKey = dr.push().getKey();
+                                            closeBottomSheet();
+                                            getLocation();
 
-                    dr.child("universities").child("michigan").child(beacon.course).child(beaconKey).setValue(beacon);
+                                            currentBeaconCourse = spinner.getSelectedItem().toString();
+                                            selectedBeaconCourse = null;    //because when we start a beacon, we should remove all filters
 
+                                            String titleString = title.getText().toString();
+                                            String descString = description.getText().toString();
 
+                                            Beacon beacon = new Beacon(currentStudent, currentBeaconCourse,
+                                                    new CustomLatLng(latitude, longitude), titleString, descString);
+
+                                            beaconsList.add(beacon);
+                                            LatLng place = new LatLng(latitude, longitude);
+                                            currentMarker = map.addMarker(new MarkerOptions().position(place).title("Your Beacon"));
+                                            markersList.add(currentMarker);
+
+                                            DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
+                                            beaconKey = dr.push().getKey();
+
+                                            dr.child("universities").child("michigan").child(beacon.course).child(beaconKey).setValue(beacon);
+                                        }
+                                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
                 }
                 else
                 {
@@ -225,7 +254,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     markersList.remove(currentMarker);
                     currentMarker = null;
                     closeBottomSheet();
-
                 }
             }
         });
@@ -270,8 +298,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
             {
-                //TODO: collapse the course list and set the search box to course selected
                 selectedBeaconCourse = currentStudent.courses.get(i);
+                searchInput.setText(selectedBeaconCourse);
+                courseListCollapse();
                 showBeacons();
             }
         });
@@ -342,7 +371,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         alertDialog.show();
     }
 
-    void courseListViewShow()
+    void courseListExpand()
     {
         coursesList.setVisibility(View.VISIBLE);
         addCourseButton.setVisibility(View.VISIBLE);
@@ -350,7 +379,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         coursesExpanded = true;
     }
 
-    void courseListViewHide()
+    void courseListCollapse()
     {
         coursesList.setVisibility(View.GONE);
         addCourseButton.setVisibility(View.GONE);
@@ -447,7 +476,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
      */
     void populateBeaconBottomSheet(Beacon beacon)
     {
-        //TODO: set photo in profile pic
         profilePic.setImageResource(R.mipmap.ic_launcher_round);
         studentName.setText(beacon.student.name);
         courseName.setText(beacon.course);
@@ -543,10 +571,21 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    //TODO: implement
     @Override
     public void onBackPressed()
     {
-        super.onBackPressed();
+        if(bottomSheet.isExpended())
+        {
+            bottomSheet.collapse();
+        }
+        else if(coursesExpanded)
+        {
+            courseListCollapse();
+        }
+        else
+        {
+            //TODO: Implement proper back handling
+            super.onBackPressed();
+        }
     }
 }
