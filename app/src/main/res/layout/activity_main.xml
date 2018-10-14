@@ -239,9 +239,9 @@
                     app:layout_constraintTop_toBottomOf="@+id/beaconTitle" />
 
                 <android.support.constraint.ConstraintLayout
-                    android:id="@+id/listLayout1"
+                    android:id="@+id/sendTextLayout"
                     android:layout_width="0dp"
-                    android:layout_height="62dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toEndOf="@+id/descriptionText"
                     app:layout_constraintStart_toStartOf="@+id/descriptionText"
@@ -252,82 +252,82 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_marginTop="7dp"
+                        android:src="@drawable/ic_textsms"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:src="@drawable/ic_textsms" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/textView4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
+                        android:text="Send a text"
                         android:textColor="@color/text"
                         android:textSize="18dp"
-                        android:text="Send a text"
                         app:layout_constraintBottom_toBottomOf="@+id/imageView"
                         app:layout_constraintStart_toEndOf="@+id/imageView"
                         app:layout_constraintTop_toTopOf="@+id/imageView" />
                 </android.support.constraint.ConstraintLayout>
 
                 <android.support.constraint.ConstraintLayout
-                    android:id="@+id/listLayout2"
+                    android:id="@+id/sendEmailLayout"
                     android:layout_width="0dp"
-                    android:layout_height="62dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    app:layout_constraintEnd_toEndOf="@id/listLayout1"
-                    app:layout_constraintStart_toStartOf="@id/listLayout1"
-                    app:layout_constraintTop_toBottomOf="@id/listLayout1">
+                    app:layout_constraintEnd_toEndOf="@id/sendTextLayout"
+                    app:layout_constraintStart_toStartOf="@id/sendTextLayout"
+                    app:layout_constraintTop_toBottomOf="@id/sendTextLayout">
 
                     <ImageView
                         android:id="@+id/imageView2"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_marginTop="8dp"
+                        android:src="@drawable/ic_email"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:src="@drawable/ic_email" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/textView3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
+                        android:text="Send an email"
                         android:textColor="@color/text"
                         android:textSize="18dp"
-                        android:text="Send an email"
                         app:layout_constraintBottom_toBottomOf="@+id/imageView2"
                         app:layout_constraintStart_toEndOf="@+id/imageView2"
                         app:layout_constraintTop_toTopOf="@+id/imageView2" />
                 </android.support.constraint.ConstraintLayout>
 
                 <android.support.constraint.ConstraintLayout
-                    android:id="@+id/listLayout3"
+                    android:id="@+id/getDirectionsLayout"
                     android:layout_width="0dp"
-                    android:layout_height="62dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="20dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@id/listLayout2"
-                    app:layout_constraintStart_toStartOf="@id/listLayout2"
-                    app:layout_constraintTop_toBottomOf="@id/listLayout2">
+                    app:layout_constraintEnd_toEndOf="@id/sendEmailLayout"
+                    app:layout_constraintStart_toStartOf="@id/sendEmailLayout"
+                    app:layout_constraintTop_toBottomOf="@id/sendEmailLayout">
 
                     <ImageView
                         android:id="@+id/imageView3"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_marginTop="8dp"
+                        android:src="@drawable/ic_directions"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:src="@drawable/ic_directions" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/textView6"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
+                        android:text="Get directions"
                         android:textColor="@color/text"
                         android:textSize="18dp"
-                        android:text="Get directions"
                         app:layout_constraintBottom_toBottomOf="@+id/imageView3"
                         app:layout_constraintStart_toEndOf="@+id/imageView3"
                         app:layout_constraintTop_toTopOf="@+id/imageView3" />
