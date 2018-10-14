@@ -154,7 +154,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                     DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
 
-                    beaconsList.clear();
                     dr.child("universities").child("michigan").child(currentBeaconCourse).child(beaconKey).removeValue();
                     currentMarker.remove();
                     markersList.remove(currentMarker);
@@ -174,6 +173,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ValueEventListener postListner = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d("check", "shiv");
+                beaconsList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     for (DataSnapshot courseBeacon : snapshot.getChildren()) {
                         Beacon b = courseBeacon.getValue(Beacon.class);
