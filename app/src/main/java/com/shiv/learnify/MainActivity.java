@@ -10,13 +10,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -41,7 +38,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.qhutch.bottomsheetlayout.BottomSheetLayout;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -53,6 +49,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     TextView courseName;
     TextView beaconTitle;
     TextView descriptionText;
+    boolean firstRefresh = true;
     private GoogleMap map;
     private double latitude;
     private double longitude;
@@ -66,14 +63,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private String beaconKey;
     private String uid;
     private String currentBeaconCourse;
-
     private ListView coursesList;
     private Button addCourseButton;
     private ImageView courseToggle;
     private boolean coursesExpanded = false;
     private TextInputEditText searchInput;
-
-    boolean firstRefresh = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,19 +90,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         uid = getIntent().getExtras().getString("uid");
 
-        addCourseButton.setOnClickListener(new View.OnClickListener()
-        {
+        addCourseButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
-                if(!searchInput.getText().toString().equals(""))
-                {
-                    if(!currentStudent.courses.contains(searchInput.getText().toString()))
-                    {
+            public void onClick(View view) {
+                if (!searchInput.getText().toString().equals("")) {
+                    if (!currentStudent.courses.contains(searchInput.getText().toString())) {
                         currentStudent.courses.add(searchInput.getText().toString());
                         coursesList.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,
                                 android.R.id.text1, currentStudent.courses));
-                        //TODO: refresh courses of student server side
+                        DatabaseReference dr = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
+                        dr.setValue(currentStudent);
                         searchInput.setText("");
                     }
                 }
@@ -130,11 +121,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         beaconTitle = findViewById(R.id.beaconTitle);
         descriptionText = findViewById(R.id.descriptionText);
 
-        courseToggle.setOnClickListener(new View.OnClickListener()
-        {
+        courseToggle.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 coursesListViewToggle();
             }
         });
@@ -247,17 +236,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Toggles the view for the courses list
      */
-    void coursesListViewToggle()
-    {
-        if(coursesExpanded)
-        {
+    void coursesListViewToggle() {
+        if (coursesExpanded) {
             coursesList.setVisibility(View.GONE);
             addCourseButton.setVisibility(View.GONE);
             searchInput.setHint("Search for Courses");
             coursesExpanded = false;
-        }
-        else
-        {
+        } else {
             coursesList.setVisibility(View.VISIBLE);
             addCourseButton.setVisibility(View.VISIBLE);
             searchInput.setHint("Add new Course");
@@ -279,6 +264,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
         }
     }
+
     /**
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
@@ -361,8 +347,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
 
-                if(firstRefresh)
-                {
+                if (firstRefresh) {
                     setMarker();
                     firstRefresh = false;
                 }
