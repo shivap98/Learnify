@@ -1,5 +1,6 @@
 package com.shiv.learnify;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -139,6 +140,9 @@ public class LoginActivity extends AppCompatActivity {
 
                             //TODO: pass the uid to intent
 
+                            Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                            i.putExtra("uid", uid);
+                            startActivity(i);
 
                         } else {
                             try {
@@ -194,6 +198,10 @@ public class LoginActivity extends AppCompatActivity {
                             dr.child(uid).setValue(stud);
 
                             //TODO: pass the uid to intent
+
+                            Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                            i.putExtra("uid", uid);
+                            startActivity(i);
 
                         } else {
                             try {
