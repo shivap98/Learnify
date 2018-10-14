@@ -186,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
                             courses.add("ECON 251");
                             courses.add("HIST 104");
 
-                            Student stud = new Student(nameString, mail, Integer.parseInt(phoneString), courses, null);
+                            Student stud = new Student(nameString, mail, phoneString, courses, null);
 
                             FirebaseUser fu = firebaseAuth.getCurrentUser();
                             String uid = fu.getUid();
