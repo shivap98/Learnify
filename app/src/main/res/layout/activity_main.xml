@@ -55,8 +55,7 @@
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/searchInput"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search for courses" />
+                    android:layout_height="wrap_content" />
             </android.support.design.widget.TextInputLayout>
 
             <ListView

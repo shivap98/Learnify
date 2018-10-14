@@ -10,13 +10,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -27,7 +27,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -85,10 +84,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private ImageView courseToggle;
     private boolean coursesExpanded = false;
     private TextInputEditText searchInput;
+    private TextInputLayout searchInputLayout;
     private String selectedBeaconCourse; // course which is selected from the course list of the student
     // which is used to filter the beacons for the map
 
     private Beacon beacon;
+    private Beacon myBeacon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,8 +107,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         addCourseButton = findViewById(R.id.addCourseButton);
         courseToggle = findViewById(R.id.courseToggleProfilePic);
         searchInput = findViewById(R.id.searchInput);
+        searchInputLayout = findViewById(R.id.searchInputLayout);
         markersList = new ArrayList<>();
         beaconsList = new ArrayList<>();
+        searchInputLayout.setHint("Search for Courses");
 
         uid = getIntent().getExtras().getString("uid");
 
@@ -204,9 +207,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
                     View promptsView = layoutInflater.inflate(R.layout.course_values_input_dialog, null);
                     final TextInputEditText title = promptsView.findViewById(R.id.titleInput);
-                    title.setHint("Title");
+                    final TextInputLayout titleLayout = promptsView.findViewById(R.id.titleInputLayout);
+                    final TextInputLayout descriptionLayout = promptsView.findViewById(R.id.descriptionInputLayout);
+                    titleLayout.setHint("Title");
                     final TextInputEditText description = promptsView.findViewById(R.id.descriptionInput);
-                    description.setHint("Description");
+                    descriptionLayout.setHint("Description");
                     final Spinner spinner = promptsView.findViewById(R.id.courseSpinner);
 
                     spinner.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, currentStudent.courses));
@@ -232,7 +237,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                             String titleString = title.getText().toString();
                                             String descString = description.getText().toString();
 
-                                            Beacon myBeacon = new Beacon(currentStudent, currentBeaconCourse,
+                                            myBeacon = new Beacon(currentStudent, currentBeaconCourse,
                                                     new CustomLatLng(latitude, longitude), titleString, descString);
 
                                             beaconsList.add(myBeacon);
@@ -251,6 +256,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 } else {
                     beaconLayout.setBackground(getDrawable(R.drawable.beacon_stroke_red));
                     beaconStatus.setText("Off");
+                    myBeacon = null;
 
                     DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
 
@@ -343,22 +349,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ConstraintLayout sendEmail = findViewById(R.id.sendEmailLayout);
         ConstraintLayout getDirections = findViewById(R.id.getDirectionsLayout);
 
-        sendText.setOnClickListener(new View.OnClickListener()
-        {
+        sendText.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", beacon.student.phone, null)));
             }
         });
 
-        sendEmail.setOnClickListener(new View.OnClickListener()
-        {
+        sendEmail.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                        "mailto",beacon.student.email, null));
+                        "mailto", beacon.student.email, null));
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Hello from Learnify!");
                 emailIntent.putExtra(Intent.EXTRA_TEXT, String.format("Hi %s!\nMy name is %s and I am also studying %s near you! Want to get together?",
                         beacon.student.name, currentStudent.name, beacon.course));
@@ -366,11 +368,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        getDirections.setOnClickListener(new View.OnClickListener()
-        {
+        getDirections.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 @SuppressLint("DefaultLocale") Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
                         Uri.parse(String.format("http://maps.google.com/maps?daddr=%f,%f",
                                 beacon.location.latitude, beacon.location.longitude)));
@@ -424,14 +424,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     void courseListExpand() {
         coursesList.setVisibility(View.VISIBLE);
         addCourseButton.setVisibility(View.VISIBLE);
-        searchInput.setHint("Add new Course");
+        searchInputLayout.setHint("Add new Course");
         coursesExpanded = true;
     }
 
     void courseListCollapse() {
         coursesList.setVisibility(View.GONE);
         addCourseButton.setVisibility(View.GONE);
-        searchInput.setHint("Search for Courses");
+        searchInputLayout.setHint("Search for Courses");
         coursesExpanded = false;
     }
 
@@ -447,7 +447,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (selectedBeaconCourse == null) {
             for (int i = 0; i < beaconsList.size(); i++) {
                 LatLng latLng = new LatLng(beaconsList.get(i).location.latitude, beaconsList.get(i).location.longitude);
-                if (beacon != null && beaconsList.get(i).description.equals(beacon.description) && beaconsList.get(i).title.equals(beacon.title))
+                if (myBeacon != null && beaconsList.get(i).description.equals(myBeacon.description) && beaconsList.get(i).title.equals(myBeacon.title))
                     markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))));
                 else
                     markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
@@ -457,7 +457,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             for (int i = 0; i < beaconsList.size(); i++) {
                 if (selectedBeaconCourse.equals(beaconsList.get(i).course)) {
                     LatLng latLng = new LatLng(beaconsList.get(i).location.latitude, beaconsList.get(i).location.longitude);
-                    if (beacon != null && beaconsList.get(i).description.equals(beacon.description) && beaconsList.get(i).title.equals(beacon.title))
+                    if (myBeacon != null && beaconsList.get(i).description.equals(myBeacon.description) && beaconsList.get(i).title.equals(myBeacon.title))
                         markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))));
                     else
                         markersList.add(map.addMarker(new MarkerOptions().position(latLng).title(beaconsList.get(i).course)));
