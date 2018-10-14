@@ -16,6 +16,7 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -310,6 +311,29 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         //linking the listener to reference
         courseReference.addValueEventListener(postListner);
+
+        //making search work again
+        searchInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                // If the event is a key-down event on the "enter" button
+                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (i == KeyEvent.KEYCODE_ENTER)) {
+                    try {
+                        if (!coursesExpanded) {
+                            Log.d("enter", "enter");
+                            if (!searchInput.getText().toString().isEmpty())
+                                selectedBeaconCourse = searchInput.getText().toString();
+                            else
+                                selectedBeaconCourse = null;
+                            showBeacons();
+                        }
+                    } catch (Exception e) {
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     /**
