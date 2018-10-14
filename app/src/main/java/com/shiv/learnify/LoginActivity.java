@@ -55,10 +55,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText name;
     private TextInputEditText phone;
     private TextInputEditText university;
-    private Button uploadButton;
     private ImageView previewDP;
     private Uri filePath;
-    private String DPLink;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -93,7 +91,6 @@ public class LoginActivity extends AppCompatActivity {
         name = findViewById(R.id.name);
         phone = findViewById(R.id.phone);
         university = findViewById(R.id.university);
-        uploadButton = findViewById(R.id.uploadPicButton);
         previewDP = findViewById(R.id.previewDP);
 
         progressBarLayout = findViewById(R.id.frameLayout);
@@ -157,7 +154,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        uploadButton.setOnClickListener(new View.OnClickListener() {
+        previewDP.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
